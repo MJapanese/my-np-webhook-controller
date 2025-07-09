@@ -289,7 +289,7 @@
     function handleNotification() {
         const title = document.getElementById('noti-title').value;
         const desc = document.getElementById('noti-desc').value;
-        triggerWebhook({ trigger: 'notification', title: title, desc: desc });
+        triggerWebhook({ Tempvar: 'notimessage', title: title, desc: desc });
     }
     function handleSpeak() {
         const input = document.getElementById('speak-input').value;
