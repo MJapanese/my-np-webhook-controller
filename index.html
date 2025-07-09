@@ -98,6 +98,7 @@
         .footer a {
             color: #0d47a1;
             font-weight: bold;
+            text-decoration: underline;
             cursor: pointer;
         }
     </style>
@@ -107,7 +108,7 @@
     <div class="container">
         <h1 class="main-title">Macrodroid Automation</h1>
 
-        <!-- Touch Actions Card -->
+        <!-- ALL THE HTML CARDS AND BUTTONS (UNCHANGED) -->
         <div class="action-card">
             <h2>Touch Actions Via</h2>
             <div class="input-group">
@@ -120,69 +121,57 @@
             </div>
             <button class="test-button" onclick="handleTouch()">Test</button>
         </div>
-
-        <!-- Other Cards -->
         <div class="action-card">
             <h2>Display Dialog</h2>
             <input type="text" id="dialog-title" placeholder="Title" class="input-group">
             <input type="text" id="dialog-desc" placeholder="Description" class="input-group">
             <button class="test-button" onclick="handleDialog()">Test</button>
         </div>
-
         <div class="action-card">
             <h2>Popup (Toast)</h2>
             <input type="text" id="popup-input" placeholder="Input" class="input-group">
             <button class="test-button" onclick="handlePopup()">Test</button>
         </div>
-
         <div class="action-card">
             <h2>Show Notification</h2>
             <input type="text" id="noti-title" placeholder="Title" class="input-group">
             <input type="text" id="noti-desc" placeholder="Description" class="input-group">
             <button class="test-button" onclick="handleNotification()">Test</button>
         </div>
-
         <div class="action-card">
             <h2>Speak Something</h2>
             <input type="text" id="speak-input" placeholder="Input" class="input-group">
             <button class="test-button" onclick="handleSpeak()">Test</button>
         </div>
-        
         <div class="action-card">
             <h2>Floating Text</h2>
             <input type="text" id="float-input" placeholder="Text" class="input-group">
             <button class="test-button" onclick="handleFloatText()">Test</button>
             <button class="test-button" onclick="triggerWebhook({trigger: 'dfloating_text'})" style="margin-top:10px; background-color: #6a1b9a;">Disable Floating Text</button>
         </div>
-
         <div class="action-card">
             <h2>Paste Text</h2>
             <input type="text" id="paste-input" placeholder="Text" class="input-group">
             <button class="test-button" onclick="handlePasteText()">Test</button>
             <button class="test-button" onclick="triggerWebhook({trigger: 'clear_input'})" style="margin-top:10px; background-color: #6a1b9a;">Clear Input Field</button>
         </div>
-
         <div class="action-card">
             <h2>DIM Screen</h2>
             <input type="number" id="dim-input" placeholder="Input (0-100)" min="0" max="100" class="input-group">
             <button class="test-button" onclick="handleDimScreen()">Test</button>
             <button class="test-button" onclick="triggerWebhook({trigger: 'dim_off'})" style="margin-top:10px; background-color: #6a1b9a;">Dim Screen Off</button>
         </div>
-
         <div class="action-card">
             <h2>Control Brightness</h2>
             <input type="number" id="bright-input" placeholder="Input (0-100)" min="0" max="100" class="input-group">
             <button class="test-button" onclick="handleBrightness()">Test</button>
         </div>
-
         <div class="action-card">
             <h2>Variable Control</h2>
             <input type="text" id="var-name" placeholder="Var Name" class="input-group">
             <input type="text" id="var-value" placeholder="Var Value" class="input-group">
             <button class="test-button" onclick="handleVariable()">Test</button>
         </div>
-
-        <!-- Button Grid -->
         <div class="button-grid">
             <button class="button" onclick="triggerWebhook({trigger: 'recent'})">Recent</button>
             <button class="button" onclick="triggerWebhook({trigger: 'home'})">Home</button>
@@ -205,46 +194,68 @@
         </div>
 
         <footer class="footer">
-            <p>You must install the macro and <a onclick="setMacroUrl()">Set Your Webhook URL</a> to use this Controller.</p>
+            <p>You must install the macro and <a onclick="setupWebhookDetails()">Set/Change Webhook Details</a> to use this Controller.</p>
             <p>Developed by ❤️ You!</p>
         </footer>
     </div>
 
 <script>
-    let baseWebhookUrl = '';
+    // --- **MODIFIED JAVASCRIPT SECTION** ---
+
+    let deviceUrl = '';
+    let macroIdentifier = '';
 
     // This function runs when the page loads
     window.onload = function() {
-        baseWebhookUrl = localStorage.getItem('macroWebhookUrl');
-        if (!baseWebhookUrl) {
-            setMacroUrl();
+        deviceUrl = localStorage.getItem('macroDeviceUrl');
+        macroIdentifier = localStorage.getItem('macroIdentifier');
+        if (!deviceUrl || !macroIdentifier) {
+            setupWebhookDetails();
         }
     };
 
-    function setMacroUrl() {
-        const url = prompt("Please enter your base MacroDroid Webhook URL:", baseWebhookUrl || "https://trigger.macrodroid.com/xxxxxxxx-xxxx...");
-        if (url) {
-            // Basic validation to ensure it's a MacroDroid URL
-            if (url.startsWith("https://trigger.macrodroid.com/")) {
-                localStorage.setItem('macroWebhookUrl', url);
-                baseWebhookUrl = url;
-                alert("Webhook URL saved successfully!");
-            } else {
-                alert("Invalid URL. It must start with 'https://trigger.macrodroid.com/'.");
-            }
+    function setupWebhookDetails() {
+        // Prompt for the first part of the URL
+        const urlInput = prompt(
+            "Step 1: Enter your Device URL.\n\nThis is the part BEFORE the identifier. It looks like:\nhttps://trigger.macrodroid.com/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+            deviceUrl || ""
+        );
+        if (!urlInput || !urlInput.startsWith("https://trigger.macrodroid.com/")) {
+            alert("Invalid Device URL. It must start with 'https://trigger.macrodroid.com/'. Setup cancelled.");
+            return;
         }
+
+        // Prompt for the second part, the identifier
+        const identifierInput = prompt(
+            "Step 2: Enter your Webhook Identifier.\n\nFrom your screenshot, this is 'enablewebhook'.",
+            macroIdentifier || "enablewebhook"
+        );
+        if (!identifierInput) {
+            alert("Identifier cannot be empty. Setup cancelled.");
+            return;
+        }
+        
+        // Save both parts to the browser's local storage
+        localStorage.setItem('macroDeviceUrl', urlInput);
+        localStorage.setItem('macroIdentifier', identifierInput);
+        
+        deviceUrl = urlInput;
+        macroIdentifier = identifierInput;
+        
+        alert("Webhook details saved successfully!");
     }
 
-    // The main function to send the webhook request
+    // The main function to send the webhook request - NOW BUILDS THE URL CORRECTLY
     function triggerWebhook(params) {
-        if (!baseWebhookUrl) {
-            alert("Webhook URL not set. Please set it first.");
-            setMacroUrl();
+        if (!deviceUrl || !macroIdentifier) {
+            alert("Webhook details are not set. Please set them first.");
+            setupWebhookDetails();
             return;
         }
 
         const queryString = new URLSearchParams(params).toString();
-        const finalUrl = `${baseWebhookUrl}?${queryString}`;
+        // **THE KEY FIX IS HERE:** We now combine all three parts correctly.
+        const finalUrl = `${deviceUrl}/${macroIdentifier}?${queryString}`;
 
         console.log("Triggering URL:", finalUrl); // For debugging
         
@@ -252,97 +263,70 @@
         fetch(finalUrl, { mode: 'no-cors' })
             .then(() => {
                 console.log("Webhook triggered successfully for:", params.trigger);
-                // Optional: give visual feedback
-                showToast(`Triggered: ${params.trigger}`);
+                showToast(`Triggered: ${params.trigger || 'Action'}`);
             })
             .catch(error => {
                 console.error("Webhook trigger failed:", error);
-                alert("Failed to trigger webhook. Check console for details.");
+                alert("Failed to trigger webhook. Check browser console for details.");
             });
     }
 
-    // --- Handler functions for each card ---
-
+    // --- Handler functions for each card (UNCHANGED) ---
     function handleTouch() {
         const x = document.getElementById('x-location').value;
         const y = document.getElementById('y-location').value;
-        if (x && y) {
-            triggerWebhook({ trigger: 'touch', x_cord: x, y_cord: y });
-        } else {
-            alert("Please enter both X and Y locations.");
-        }
+        if (x && y) { triggerWebhook({ trigger: 'touch', x_cord: x, y_cord: y }); } else { alert("Please enter both X and Y locations."); }
     }
-    
     function handleDialog() {
         const title = document.getElementById('dialog-title').value;
         const desc = document.getElementById('dialog-desc').value;
         triggerWebhook({ trigger: 'dialog', title: title, desc: desc });
     }
-
     function handlePopup() {
         const input = document.getElementById('popup-input').value;
         triggerWebhook({ trigger: 'popup', input: input });
     }
-
     function handleNotification() {
         const title = document.getElementById('noti-title').value;
         const desc = document.getElementById('noti-desc').value;
         triggerWebhook({ trigger: 'notification', title: title, desc: desc });
     }
-
     function handleSpeak() {
         const input = document.getElementById('speak-input').value;
         triggerWebhook({ trigger: 'speak', input: input });
     }
-
     function handleFloatText() {
         const text = document.getElementById('float-input').value;
         triggerWebhook({ trigger: 'floating_text', text: text });
     }
-
     function handlePasteText() {
         const text = document.getElementById('paste-input').value;
         triggerWebhook({ trigger: 'paste', text: text });
     }
-    
     function handleDimScreen() {
         const level = document.getElementById('dim-input').value;
         triggerWebhook({ trigger: 'dim', level: level });
     }
-
     function handleBrightness() {
         const level = document.getElementById('bright-input').value;
         triggerWebhook({ trigger: 'bright', level: level });
     }
-    
     function handleVariable() {
         const name = document.getElementById('var-name').value;
         const value = document.getElementById('var-value').value;
-        if (name) {
-            triggerWebhook({ trigger: 'variable', var_name: name, var_val: value });
-        } else {
-            alert("Variable Name is required.");
-        }
+        if (name) { triggerWebhook({ trigger: 'variable', var_name: name, var_val: value }); } else { alert("Variable Name is required."); }
     }
 
-    // --- Helper for feedback ---
+    // --- Helper for feedback (UNCHANGED) ---
     function showToast(message) {
         const toast = document.createElement('div');
         toast.textContent = message;
-        toast.style.position = 'fixed';
-        toast.style.bottom = '20px';
-        toast.style.left = '50%';
-        toast.style.transform = 'translateX(-50%)';
-        toast.style.backgroundColor = 'rgba(0,0,0,0.7)';
-        toast.style.color = 'white';
-        toast.style.padding = '10px 20px';
-        toast.style.borderRadius = '20px';
-        toast.style.zIndex = '1000';
-        toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.5s';
-        
+        toast.style.position = 'fixed'; toast.style.bottom = '20px'; toast.style.left = '50%';
+        toast.style.transform = 'translateX(-50%)'; toast.style.backgroundColor = 'rgba(0,0,0,0.7)';
+        toast.style.color = 'white'; toast.style.padding = '10px 20px';
+        toast.style.borderRadius = '20px'; toast.style.zIndex = '1000';
+        toast.style.opacity = '0'; toast.style.transition = 'opacity 0.5s';
         document.body.appendChild(toast);
-        
         setTimeout(() => { toast.style.opacity = '1'; }, 10);
         setTimeout(() => {
             toast.style.opacity = '0';
@@ -352,4 +336,4 @@
 
 </script>
 </body>
-</html>
+        </html>
